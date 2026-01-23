@@ -19,6 +19,7 @@ set -e
 : ${LLVM_REPOSITORY:=https://github.com/llvm/llvm-project.git}
 : ${LLVM_VERSION:=llvmorg-21.1.8}
 : ${LLVM_BUILD_TYPE:=Release}
+
 ASSERTS=OFF
 unset HOST
 BUILDDIR="build"
@@ -255,9 +256,7 @@ if [ -n "$HOST" ]; then
     BUILDDIR=$BUILDDIR-$HOST
 
     if [ -n "$WITH_PYTHON" ] && [ -n "$TARGET_WINDOWS" ]; then
-        # The python3-config script requires executing with bash. It outputs
-        # an extra trailing space, which the extra 'echo' layer gets rid of.
-        EXT_SUFFIX="$(echo $(bash $PREFIX/python/bin/python3-config --extension-suffix))"
+        EXT_SUFFIX="$(python3 $PREFIX/python/bin/python3-config --extension-suffix)"
         PYTHON_RELATIVE_PATH="$(cd "$PREFIX" && echo python/lib/python*/site-packages)"
         PYTHON_INCLUDE_DIR="$(echo $PREFIX/python/include/python*)"
         PYTHON_LIB="$(echo $PREFIX/python/lib/libpython3.*.dll.a)"
@@ -417,6 +416,7 @@ cmake \
     -DCMAKE_BUILD_TYPE=Release \
     -DLLVM_ENABLE_ASSERTIONS=$ASSERTS \
     -DLLVM_ENABLE_PROJECTS="$PROJECTS" \
+    -DLLVM_ENABLE_BINDINGS=OFF \
     -DLLVM_TARGETS_TO_BUILD="ARM;AArch64;X86;NVPTX" \
     -DLLVM_INSTALL_TOOLCHAIN_ONLY=$TOOLCHAIN_ONLY \
     -DLLVM_LINK_LLVM_DYLIB=$LINK_DYLIB \

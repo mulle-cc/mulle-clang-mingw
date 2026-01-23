@@ -17,8 +17,8 @@
 set -e
 
 : ${LIBFFI_VERSION:=v3.4.7}
-: ${PYTHON_VERSION:=v3.12.9}
-: ${PYTHON_VERSION_MINGW:=1b241aa8572ee8cd4131fffca838b6bbdf5a7b5e}
+: ${PYTHON_VERSION:=v3.13.11}
+: ${PYTHON_VERSION_MINGW:=bbd33f429f50c5aca3d830cabe5324a499754752}
 
 unset HOST
 
@@ -134,6 +134,8 @@ cd $BUILDDIR
 ../configure --prefix="$PREFIX" --host=$HOST --disable-symvers --disable-docs
 $MAKE -j$CORES
 $MAKE install
+mkdir -p "$PREFIX/share/libffi"
+install -m644 ../LICENSE "$PREFIX/share/libffi/LICENSE.txt"
 cd ../..
 
 cd cpython-mingw
@@ -165,5 +167,7 @@ find $PREFIX/lib/python* -name __pycache__ | xargs rm -rf
 # (for python3, python3w, python3-config, idle3 and pydoc3) after installing
 # a Python version that is supposed to be the primary Python.
 cp -a $PREFIX/bin/python3.exe $PREFIX/bin/python.exe
+
+install -m644 ../LICENSE "$PREFIX/LICENSE.txt"
 
 cd ../..
