@@ -8,10 +8,11 @@ CXX=clang++ \
 LLVM_VERSION=21.1.8.1 \
 LLVM_REPOSITORY=https://github.com/mulle-cc/mulle-clang-project.git \
 LLVM_BUILD_TYPE=Release \
+TOOLCHAIN_ARCHS="i686 x86_64 armv7 aarch64" \
    ./build-all.sh /opt/mulle-clang-project-windows/21.1.8.1
 ```
 
-To clean also the downloaded repos use `git -f -f -d -x`
+To clean also the downloaded repos use `git clean -f -f -d -x`
 
 ---
 
