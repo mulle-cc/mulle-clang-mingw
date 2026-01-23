@@ -18,6 +18,7 @@ set -e
 
 : ${LLVM_REPOSITORY:=https://github.com/llvm/llvm-project.git}
 : ${LLVM_VERSION:=llvmorg-21.1.8}
+: ${LLVM_BUILD_TYPE:=Release}
 ASSERTS=OFF
 unset HOST
 BUILDDIR="build"
@@ -26,7 +27,6 @@ ASSERTSSUFFIX=""
 LLDB=ON
 CLANG_TOOLS_EXTRA=ON
 INSTRUMENTED=OFF
-LLVM_REPOSITORY='https://github.com/llvm/llvm-project.git'
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -292,10 +292,13 @@ else
     fi
 fi
 
+#
 # mulle stuff
+#
 CMAKEFLAGS="$CMAKEFLAGS -DCLANG_VENDOR=mulle"
 CMAKEFLAGS="$CMAKEFLAGS -DLLVM_BUILD_TESTS=OFF"
 CMAKEFLAGS="$CMAKEFLAGS -DDOXYGEN_EXECUTABLE="
+CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_BUILD_TYPE=${LLVM_BUILD_TYPE}"
 
 
 if [ -n "$COMPILER_LAUNCHER" ]; then

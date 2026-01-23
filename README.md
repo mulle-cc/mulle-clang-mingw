@@ -1,3 +1,18 @@
+# mulle-clang-project-windows
+
+Build mulle-clang for windows:
+
+``` bash
+CC=clang \
+CXX=clang++ \
+LLVM_VERSION=21.1.8.0 \
+LLVM_REPOSITORY=https://github.com/mulle-cc/mulle-clang-project.git \
+LLVM_BUILD_TYPE=Debug \
+   ./build-all.sh /opt/mulle-clang-project-windows/21.1.8
+```
+
+---
+
 LLVM MinGW
 ==========
 
