@@ -12,7 +12,29 @@ TOOLCHAIN_ARCHS="i686 x86_64 armv7 aarch64" \
    ./build-all.sh /opt/mulle-clang-project-windows/21.1.8.2
 ```
 
-To clean also the downloaded repos use `git clean -f -f -d -x`
+> #### Tip
+>
+> To clean the downloaded repos use `git clean -f -f -d -x`
+> The double `-f` is not a typo...
+
+Then try it out, cross building an Objective-C executable on linux/macos and
+then running it with [wine](https://www.winehq.org/) or directly on windows:
+
+``` bash
+mulle-sde init -d cross-test \
+               -m mulle-foundation/objc-developer \
+               executable
+(
+   cd cross-test
+   cp /opt/mulle-clang-project-windows/21.1.8.2/share/toolchain-mulle-clang-mingw.cmake \
+      cmake/
+   mulle-sde env set MULLE_CRAFT_PLATFORMS 'windows'
+   mulle-sde env set MULLE_SOURCETREE_PLATFORMS 'windows'
+   mulle-sde env set MULLE_CRAFT_TOOLCHAIN__WINDOWS 'toolchain-mulle-clang-mingw.cmake'
+   mulle-sde env set MULLE_EMULATOR_WINDOWS 'wine64'
+   mulle-sde run
+)
+```
 
 ---
 
