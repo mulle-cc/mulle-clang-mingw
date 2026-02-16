@@ -1,4 +1,6 @@
 # Toolchain file for cross-compiling to Windows via llvm-mingw + Clang
+# THIS FILE IS NOT USED BY mulle-sde! mulle-sde comes with its own toolchain
+# file
 
 # The target system
 set(CMAKE_SYSTEM_NAME Windows)
@@ -31,7 +33,7 @@ set(MULLE_CXX_COMPILER_ID "MULLECLANG")
 # Root of your llvm-mingw installation
 # Adjust this path to your installation
 # Hardcoded default
-set(DEFAULT_LLVM_MINGW_ROOT "/opt/mulle-clang-project-windows/21.1.8.2")
+set(DEFAULT_LLVM_MINGW_ROOT "/opt/mulle-clang-project-windows/21.1.8.3")
 
 # Tell CMake where to find our platform override files
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Platform" ${CMAKE_MODULE_PATH})

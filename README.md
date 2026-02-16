@@ -5,11 +5,11 @@ Build mulle-clang for windows:
 ``` bash
 CC=clang \
 CXX=clang++ \
-LLVM_VERSION=21.1.8.2 \
+LLVM_VERSION=21.1.8.3 \
 LLVM_REPOSITORY=https://github.com/mulle-cc/mulle-clang-project.git \
 LLVM_BUILD_TYPE=Release \
 TOOLCHAIN_ARCHS="i686 x86_64 armv7 aarch64" \
-   ./build-all.sh /opt/mulle-clang-project-windows/21.1.8.2
+   ./build-all.sh /opt/mulle-clang-project-windows/21.1.8.3
 ```
 
 > #### Tip
@@ -26,7 +26,7 @@ mulle-sde init -d cross-test \
                executable
 (
    cd cross-test
-   cp /opt/mulle-clang-project-windows/21.1.8.2/share/toolchain-mulle-clang-mingw.cmake \
+   cp /opt/mulle-clang-project-windows/21.1.8.3/share/toolchain-mulle-clang-mingw.cmake \
       cmake/
    mulle-sde env set MULLE_CRAFT_PLATFORMS 'windows'
    mulle-sde env set MULLE_SOURCETREE_PLATFORMS 'windows'
