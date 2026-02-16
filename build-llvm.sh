@@ -437,5 +437,6 @@ else
     cmake --install . --strip
 
     cp ../LICENSE.TXT $PREFIX
-    install -v -D -m 644 ../../../toolchain-mulle-clang-mingw.cmake $PREFIX/share/toolchain-mulle-clang-mingw.cmake
+    install -v -D -m 644 '../../../toolchain--linux-windows--x86_64-w64-mingw32--mulle-clang.cmake' \
+                         "$PREFIX/share/toolchain-mulle-clang-mingw.cmake"
 fi

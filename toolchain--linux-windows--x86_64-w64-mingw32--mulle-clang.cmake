@@ -1,11 +1,12 @@
 # Toolchain file for cross-compiling to Windows via llvm-mingw + Clang
-# THIS FILE IS NOT USED BY mulle-sde! mulle-sde comes with its own toolchain
-# file
 
 # The target system
 set(CMAKE_SYSTEM_NAME Windows)
 # You may change this to i686, aarch64, etc
 set(CMAKE_SYSTEM_PROCESSOR x86_64)
+
+# And this too
+set(TRIPLET x86_64-w64-mingw32)
 
 # CRITICAL: Override system include flags BEFORE compiler detection
 # CMake 3.24+ uses -external:I for Clang on Windows, but llvm-mingw doesn't support it
@@ -30,45 +31,26 @@ set(CMAKE_CXX_COMPILER_FRONTEND_VARIANT "GNU" CACHE STRING "CXX compiler fronten
 set(MULLE_C_COMPILER_ID "MULLECLANG")
 set(MULLE_CXX_COMPILER_ID "MULLECLANG")
 
-# Root of your llvm-mingw installation
-# Adjust this path to your installation
-# Hardcoded default
-set(DEFAULT_LLVM_MINGW_ROOT "/opt/mulle-clang-project-windows/21.1.8.3")
-
 # Tell CMake where to find our platform override files
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Platform" ${CMAKE_MODULE_PATH})
 
-# Check for cache variable override
+# Root of your llvm-mingw installation
+# Check for environment variable (set by mulle-sde platform system)
 if(NOT DEFINED LLVM_MINGW_ROOT)
-    if(DEFINED ENV{LLVM_MINGW_ROOT})
+    if(DEFINED ENV{MULLE_CROSS_COMPILER_ROOT})
+        set(LLVM_MINGW_ROOT $ENV{MULLE_CROSS_COMPILER_ROOT})
+    elseif(DEFINED ENV{LLVM_MINGW_ROOT})
         set(LLVM_MINGW_ROOT $ENV{LLVM_MINGW_ROOT})
-    elseif(EXISTS "${DEFAULT_LLVM_MINGW_ROOT}")
-        set(LLVM_MINGW_ROOT "${DEFAULT_LLVM_MINGW_ROOT}")
     else()
-        # Auto-detect the highest version under /opt/mulle-clang-project-windows
-        file(GLOB ALL_LLVM_MINGW "/opt/mulle-clang-project-windows/*")
-        set(HIGHEST_VERSION "")
-        foreach(dir ${ALL_LLVM_MINGW})
-            if(IS_DIRECTORY "${dir}")
-                get_filename_component(basename "${dir}" NAME)
-                if(basename MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+$")
-                    if(HIGHEST_VERSION STREQUAL "" OR basename VERSION_GREATER HIGHEST_VERSION)
-                        set(HIGHEST_VERSION "${basename}")
-                    endif()
-                endif()
-            endif()
-        endforeach()
-        if(HIGHEST_VERSION STREQUAL "")
-            message(FATAL_ERROR "Could not detect LLVM-Mingw installation. Set -DLLVM_MINGW_ROOT or LLVM_MINGW_ROOT environment variable.")
-        endif()
-        set(LLVM_MINGW_ROOT "/opt/mulle-clang-project-windows/${HIGHEST_VERSION}")
+        # Fallback to default for now
+        set(LLVM_MINGW_ROOT "/opt/mulle-clang-project-windows/latest")
+        message(STATUS "Using default LLVM_MINGW_ROOT. Set with: mulle-sde platform set windows root<path>")
     endif()
 endif()
 
 message(STATUS "Using LLVM-Mingw root: ${LLVM_MINGW_ROOT}")
 
 # Target triplet
-set(TRIPLET x86_64-w64-mingw32)
 
 # Compilers - override any mulle-make defaults
 set(CMAKE_C_COMPILER   ${LLVM_MINGW_ROOT}/bin/${TRIPLET}-clang CACHE FILEPATH "C compiler" FORCE)
@@ -99,4 +81,4 @@ set(MINGW TRUE)
 # Optional flags
 set(CMAKE_CXX_FLAGS_INIT   "-fuse-ld=lld")
 # Export all symbols so DLLs can find them via dlsym (needed for mulle-atinit)
-set(CMAKE_EXE_LINKER_FLAGS_INIT "-static -Wl,--export-all-symbols")
+#set(CMAKE_EXE_LINKER_FLAGS_INIT "-static -Wl,--export-all-symbols")

@@ -9,7 +9,8 @@ LLVM_VERSION=21.1.8.3 \
 LLVM_REPOSITORY=https://github.com/mulle-cc/mulle-clang-project.git \
 LLVM_BUILD_TYPE=Release \
 TOOLCHAIN_ARCHS="i686 x86_64 armv7 aarch64" \
-   ./build-all.sh /opt/mulle-clang-project-windows/21.1.8.3
+   ./build-all.sh /opt/mulle-clang-project-windows/21.1.8.3 && \
+(cd /opt/mulle-clang-project-windows && ln -sf 21.1.8.3 latest)
 ```
 
 > #### Tip
@@ -26,12 +27,10 @@ mulle-sde init -d cross-test \
                executable
 (
    cd cross-test
-   cp /opt/mulle-clang-project-windows/21.1.8.3/share/toolchain-mulle-clang-mingw.cmake \
+   cp /opt/mulle-clang-project-windows/latest/share/toolchain--linux-windows--x86_64-w64-mingw32--mulle-clang.cmake \
       cmake/
-   mulle-sde env set MULLE_CRAFT_PLATFORMS 'windows'
-   mulle-sde env set MULLE_SOURCETREE_PLATFORMS 'windows'
-   mulle-sde env set MULLE_CRAFT_TOOLCHAIN__WINDOWS 'toolchain-mulle-clang-mingw.cmake'
-   mulle-sde env set MULLE_EMULATOR_WINDOWS 'wine64'
+   mulle-sde platform add 'windows'
+   mulle-sde platform set emulator 'wine'
    mulle-sde run
 )
 ```
