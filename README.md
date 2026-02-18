@@ -5,17 +5,20 @@ Build mulle-clang for windows:
 ``` bash
 CC=clang \
 CXX=clang++ \
-LLVM_VERSION=21.1.8.3 \
+LLVM_VERSION=21.1.8.4 \
 LLVM_REPOSITORY=https://github.com/mulle-cc/mulle-clang-project.git \
 LLVM_BUILD_TYPE=Release \
 TOOLCHAIN_ARCHS="i686 x86_64 armv7 aarch64" \
-   ./build-all.sh /opt/mulle-clang-project-windows/21.1.8.3 && \
-(cd /opt/mulle-clang-project-windows && ln -sf 21.1.8.3 latest)
+   ./build-all.sh /opt/mulle-clang-project-windows/21.1.8.4 && \
+(cd /opt/mulle-clang-project-windows && ln -sf 21.1.8.4 latest)
 ```
 
 > #### Tip
 >
-> To clean the downloaded repos use `git clean -f -f -d -x`
+> To clean the downloaded repos use
+> ``` bash
+> git clean -f -f -d -x
+> ```
 > The double `-f` is not a typo...
 
 Then try it out, cross building an Objective-C executable on linux/macos and
