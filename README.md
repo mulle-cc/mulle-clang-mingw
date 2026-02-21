@@ -5,12 +5,12 @@ Build mulle-clang for windows:
 ``` bash
 CC=clang \
 CXX=clang++ \
-LLVM_VERSION=21.1.8.4 \
+LLVM_VERSION=21.1.8.5 \
 LLVM_REPOSITORY=https://github.com/mulle-cc/mulle-clang-project.git \
 LLVM_BUILD_TYPE=Release \
 TOOLCHAIN_ARCHS="i686 x86_64 armv7 aarch64" \
-   ./build-all.sh /opt/mulle-clang-project-windows/21.1.8.4 && \
-(cd /opt/mulle-clang-project-windows && ln -sf 21.1.8.4 latest)
+   ./build-all.sh /opt/mulle-clang-project-windows/21.1.8.5 && \
+(cd /opt/mulle-clang-project-windows && ln -sfn 21.1.8.5 latest)
 ```
 
 > #### Tip
