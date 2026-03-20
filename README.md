@@ -5,13 +5,31 @@ Build mulle-clang for windows:
 ``` bash
 CC=clang \
 CXX=clang++ \
-LLVM_VERSION=21.1.8.5 \
+LLVM_VERSION=21.1.8.6 \
 LLVM_REPOSITORY=https://github.com/mulle-cc/mulle-clang-project.git \
 LLVM_BUILD_TYPE=Release \
 TOOLCHAIN_ARCHS="i686 x86_64 armv7 aarch64" \
-   ./build-all.sh /opt/mulle-clang-project-windows/21.1.8.5 && \
-(cd /opt/mulle-clang-project-windows && ln -sfn 21.1.8.5 latest)
+   ./build-all.sh /opt/mulle-clang-project-windows/21.1.8.6 && \
+(cd /opt/mulle-clang-project-windows && ln -sfn 21.1.8.6 latest)
 ```
+
+## Building from a local source directory
+
+To build from a local directory instead of fetching from GitHub, set `LLVM_REPOSITORY` to your local path,
+and be sure you have committed:
+
+``` bash
+CC=clang \
+CXX=clang++ \
+LLVM_REPOSITORY=/home/src/srcL/mulle-clang-21.1.8/mulle-clang-project \
+LLVM_VERSION=mulle/21.1.8 \
+LLVM_BUILD_TYPE=Release \
+TOOLCHAIN_ARCHS="i686 x86_64 armv7 aarch64" \
+   ./build-all.sh /opt/mulle-clang-project-windows/21.1.8.6
+(cd /opt/mulle-clang-project-windows && ln -sfn 21.1.8.6 latest)
+```
+
+Git will clone from the local directory (using hardlinks for efficiency). Set `LLVM_VERSION` to `HEAD` or any branch/commit available in your local repository.
 
 > #### Tip
 >
