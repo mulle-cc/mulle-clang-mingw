@@ -5,12 +5,12 @@ Build mulle-clang for windows:
 ``` bash
 CC=clang \
 CXX=clang++ \
-LLVM_VERSION=21.1.8.7 \
+LLVM_VERSION=22.1.2.1 \
 LLVM_REPOSITORY=https://github.com/mulle-cc/mulle-clang-project.git \
 LLVM_BUILD_TYPE=Release \
 TOOLCHAIN_ARCHS="i686 x86_64 armv7 aarch64" \
-   ./build-all.sh /opt/mulle-clang-project-windows/21.1.8.7 && \
-(cd /opt/mulle-clang-project-windows && ln -sfn 21.1.8.7 latest)
+   ./build-all.sh /opt/mulle-clang-project-windows/22.1.2.1 && \
+(cd /opt/mulle-clang-project-windows && ln -sfn 22.1.2.1 latest)
 ```
 
 ## Building from a local source directory
@@ -21,12 +21,12 @@ and be sure you have committed:
 ``` bash
 CC=clang \
 CXX=clang++ \
-LLVM_REPOSITORY=/home/src/srcL/mulle-clang-21.1.8/mulle-clang-project \
-LLVM_VERSION=mulle/21.1.8 \
+LLVM_REPOSITORY=/home/src/srcL/mulle-clang-22.1.2/mulle-clang-project \
+LLVM_VERSION=mulle/22.1.2 \
 LLVM_BUILD_TYPE=Release \
 TOOLCHAIN_ARCHS="i686 x86_64 armv7 aarch64" \
-   ./build-all.sh /opt/mulle-clang-project-windows/21.1.8.7
-(cd /opt/mulle-clang-project-windows && ln -sfn 21.1.8.7 latest)
+   ./build-all.sh /opt/mulle-clang-project-windows/22.1.2.1
+(cd /opt/mulle-clang-project-windows && ln -sfn 22.1.2.1 latest)
 ```
 
 Git will clone from the local directory (using hardlinks for efficiency).
