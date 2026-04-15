@@ -77,7 +77,7 @@ jobs:
             --arg merge "$MERGE_SHA" \
             '{
               title: $title,
-              body: ("Auto-resolved merge conflicts when syncing upstream `mstorsjo/llvm-mingw` commit " + $upstream + " into tracking (merge commit " + $merge + ").\n\nOur side (`-X ours`) was preferred. Review these conflicts to ensure nothing important was dropped.\n\n<pre>\n" + $conflicts + "\n</pre>")
+              body: ("Auto-resolved merge conflicts when syncing upstream `mstorsjo/llvm-mingw` commit " + $upstream + " into tracking (merge commit " + $merge + ").\n\nOur side (`-X ours`) was preferred. Review these conflicts to ensure nothing important was dropped.\n\n```diff\n" + $conflicts + "\n```")
             }' | curl -sf -X POST \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
