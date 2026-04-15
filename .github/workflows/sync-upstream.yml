@@ -62,24 +62,17 @@ jobs:
 
       - name: Create issue for resolved conflicts
         if: steps.clean_merge.outcome == 'failure'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           MERGE_SHA=$(git rev-parse HEAD)
           UPSTREAM_SHA=$(git rev-parse "upstream/$UPSTREAM_DEFAULT")
-          gh issue create \
-            --title "Upstream sync: merge conflicts auto-resolved with -X ours" \
-            --body "$(cat <<EOF
-          The daily upstream sync from \`mstorsjo/llvm-mingw\` (\`$UPSTREAM_DEFAULT\`) had merge conflicts
-          that were auto-resolved by preferring our side (\`-X ours\`).
-
-          - Upstream commit: $UPSTREAM_SHA
-          - Resulting merge commit: $MERGE_SHA
-          - Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-
-          Please review the merge to ensure no important upstream changes were silently dropped.
-          EOF
-          )"
+          curl -sf -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/${{ github.repository }}/issues \
+            -d "$(jq -n \
+              --arg title "Upstream sync: merge conflicts auto-resolved with -X ours" \
+              --arg body "The daily upstream sync from \`mstorsjo/llvm-mingw\` (\`$UPSTREAM_DEFAULT\`) had merge conflicts that were auto-resolved by preferring our side (\`-X ours\`).\n\n- Upstream commit: $UPSTREAM_SHA\n- Resulting merge commit: $MERGE_SHA\n- Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\nPlease review the merge to ensure no important upstream changes were silently dropped." \
+              '{title: $title, body: $body}')"
 
       - name: Push tracking
         run: git push origin tracking
