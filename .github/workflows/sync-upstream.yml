@@ -1,0 +1,52 @@
+name: Sync upstream
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine default branches
+        run: |
+          UPSTREAM_DEFAULT=$(curl -sf https://api.github.com/repos/mstorsjo/llvm-mingw | jq -r .default_branch)
+          ORIGIN_DEFAULT=$(curl -sf -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }} | jq -r .default_branch)
+          echo "UPSTREAM_DEFAULT=$UPSTREAM_DEFAULT" >> "$GITHUB_ENV"
+          echo "ORIGIN_DEFAULT=$ORIGIN_DEFAULT" >> "$GITHUB_ENV"
+          echo "Upstream default: $UPSTREAM_DEFAULT, Origin default: $ORIGIN_DEFAULT"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.ORIGIN_DEFAULT }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch upstream
+        run: |
+          git remote add upstream https://github.com/mstorsjo/llvm-mingw.git
+          git fetch upstream "$UPSTREAM_DEFAULT"
+
+      - name: Create or update tracking branch
+        run: |
+          git fetch origin tracking || true
+          if git rev-parse --verify origin/tracking >/dev/null 2>&1; then
+            git checkout tracking
+          else
+            git checkout -b tracking
+          fi
+
+      - name: Merge default branch into tracking
+        run: git merge --no-edit "origin/$ORIGIN_DEFAULT"
+
+      - name: Merge upstream into tracking
+        run: git merge --no-edit "upstream/$UPSTREAM_DEFAULT"
+
+      - name: Push tracking
+        run: git push origin tracking
