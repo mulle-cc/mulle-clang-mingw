@@ -46,7 +46,7 @@ jobs:
         run: git merge --no-edit "origin/$ORIGIN_DEFAULT"
 
       - name: Merge upstream into tracking
-        run: git merge --no-edit "upstream/$UPSTREAM_DEFAULT"
+        run: git merge --no-edit -X ours "upstream/$UPSTREAM_DEFAULT"
 
       - name: Push tracking
         run: git push origin tracking
