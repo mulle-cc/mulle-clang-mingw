@@ -5,6 +5,10 @@ on:
     - cron: '0 6 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+  issues: write
+
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -46,7 +50,37 @@ jobs:
         run: git merge --no-edit "origin/$ORIGIN_DEFAULT"
 
       - name: Merge upstream into tracking
-        run: git merge --no-edit -X ours "upstream/$UPSTREAM_DEFAULT"
+        id: clean_merge
+        continue-on-error: true
+        run: git merge --no-edit "upstream/$UPSTREAM_DEFAULT"
+
+      - name: Fallback merge with -X ours
+        if: steps.clean_merge.outcome == 'failure'
+        run: |
+          git merge --abort
+          git merge --no-edit -X ours "upstream/$UPSTREAM_DEFAULT"
+
+      - name: Create issue for resolved conflicts
+        if: steps.clean_merge.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          MERGE_SHA=$(git rev-parse HEAD)
+          UPSTREAM_SHA=$(git rev-parse "upstream/$UPSTREAM_DEFAULT")
+          gh issue create \
+            --title "Upstream sync: merge conflicts auto-resolved with -X ours" \
+            --label "upstream-sync" \
+            --body "$(cat <<EOF
+          The daily upstream sync from \`mstorsjo/llvm-mingw\` (\`$UPSTREAM_DEFAULT\`) had merge conflicts
+          that were auto-resolved by preferring our side (\`-X ours\`).
+
+          - Upstream commit: $UPSTREAM_SHA
+          - Resulting merge commit: $MERGE_SHA
+          - Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          Please review the merge to ensure no important upstream changes were silently dropped.
+          EOF
+          )"
 
       - name: Push tracking
         run: git push origin tracking
