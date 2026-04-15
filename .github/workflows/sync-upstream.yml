@@ -67,6 +67,7 @@ jobs:
         run: |
           MERGE_SHA=$(git rev-parse HEAD)
           UPSTREAM_SHA=$(git rev-parse "upstream/$UPSTREAM_DEFAULT")
+          gh label create "upstream-sync" --color "D93F0B" --description "Auto-resolved upstream merge conflicts" 2>/dev/null || true
           gh issue create \
             --title "Upstream sync: merge conflicts auto-resolved with -X ours" \
             --label "upstream-sync" \
