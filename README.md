@@ -21,8 +21,8 @@ and be sure you have committed:
 ``` bash
 CC=clang \
 CXX=clang++ \
-LLVM_REPOSITORY=/home/src/srcL/mulle-clang-22.1.2/mulle-clang-project \
-LLVM_VERSION=mulle/22.1.2 \
+LLVM_REPOSITORY=/home/src/srcL/mulle-clang-22.1.8/mulle-clang-project \
+LLVM_VERSION=mulle/22.1.8 \
 LLVM_BUILD_TYPE=Release \
 TOOLCHAIN_ARCHS="i686 x86_64 armv7 aarch64" \
    ./build-all.sh /opt/mulle-clang-project-windows/22.1.8.7 && \
