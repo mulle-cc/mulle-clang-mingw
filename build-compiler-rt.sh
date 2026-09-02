@@ -82,6 +82,18 @@ else
     esac
 fi
 
+cat<<EOF > is-ucrt.c
+#include <corecrt.h>
+#if !defined(_UCRT)
+#error not ucrt
+#endif
+EOF
+ANY_ARCH=$(echo $ARCHS | awk '{print $1}')
+if $ANY_ARCH-w64-mingw32-gcc$TOOLEXT -E is-ucrt.c > /dev/null 2>&1; then
+    IS_UCRT=1
+fi
+rm -f is-ucrt.c
+
 cd llvm-project/compiler-rt
 
 INSTALL_PREFIX="$CLANG_RESOURCE_DIR"
@@ -122,7 +134,26 @@ if [ -n "$NATIVE" ]; then
     exit 0
 fi
 
+ARM64X_FLAGS=""
+if [ -z "$SANITIZERS" ]; then
+    for arch in $ARCHS; do
+        case $arch in
+        arm64ec) ARM64X_FLAGS="-marm64x" ;;
+        esac
+    done
+fi
+
 for arch in $ARCHS; do
+    FLAGS=""
+    case $arch in
+    aarch64)
+        FLAGS="$ARM64X_FLAGS"
+        ;;
+    arm64ec)
+        continue
+        ;;
+    esac
+
     [ -z "$CLEAN" ] || rm -rf build-$arch$BUILD_SUFFIX
     mkdir -p build-$arch$BUILD_SUFFIX
     cd build-$arch$BUILD_SUFFIX
@@ -148,49 +179,37 @@ for arch in $ARCHS; do
         -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
         -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
         -DSANITIZER_CXX_ABI=libc++ \
-        -DCMAKE_C_FLAGS_INIT="$CFGUARD_CFLAGS" \
-        -DCMAKE_CXX_FLAGS_INIT="$CFGUARD_CFLAGS" \
+        -DCMAKE_C_FLAGS_INIT="$CFGUARD_CFLAGS $FLAGS" \
+        -DCMAKE_CXX_FLAGS_INIT="$CFGUARD_CFLAGS $FLAGS" \
+        -DCMAKE_ASM_FLAGS_INIT="$FLAGS" \
         $SRC_DIR
     cmake --build . ${CORES:+-j${CORES}}
-
-    # Skip install on arm64ec, we merge archives instead.
-    if [ "$arch" = "arm64ec" ]; then
-        cd ..
-        continue
-    fi
 
     cmake --install . --prefix "$INSTALL_PREFIX"
     mkdir -p "$PREFIX/$arch-w64-mingw32/bin"
     if [ -n "$SANITIZERS" ]; then
-        case $arch in
-        aarch64)
-            # asan doesn't work on aarch64 or armv7; make this clear by omitting
-            # the installed files altogether.
-            rm -f "$INSTALL_PREFIX/lib/windows/libclang_rt.asan"*aarch64*
-            ;;
-        armv7)
-            rm -f "$INSTALL_PREFIX/lib/windows/libclang_rt.asan"*arm*
-            ;;
-        *)
-            mv "$INSTALL_PREFIX/lib/windows/"*.dll "$PREFIX/$arch-w64-mingw32/bin"
-            ;;
-        esac
+        if [ -z "$IS_UCRT" ]; then
+            # For msvcrt builds, remove the asan files; asan doesn't work
+            # properly on top of msvcrt, only on top of UCRT. Make this clear
+            # by omitting the installed files altogether.
+            rm -f "$INSTALL_PREFIX/lib/windows/libclang_rt.asan"*
+        else
+            case $arch in
+            aarch64)
+                # asan doesn't work on aarch64 or armv7; make this clear by omitting
+                # the installed files altogether.
+                rm -f "$INSTALL_PREFIX/lib/windows/libclang_rt.asan"*aarch64*
+                ;;
+            armv7)
+                rm -f "$INSTALL_PREFIX/lib/windows/libclang_rt.asan"*arm*
+                ;;
+            *)
+                mv "$INSTALL_PREFIX/lib/windows/"*.dll "$PREFIX/$arch-w64-mingw32/bin"
+                ;;
+            esac
+        fi
     fi
     cd ..
-done
-
-# Clang expects the aarch64 compiler-rt name on ARM64EC. While this could be adjusted
-# in Clang, the current approach mirrors MSVC, where the core CRT is provided as
-# archives containing both EC and native support. Ideally, the LLVM build system would
-# handle this automatically, but for now we can merge it here.
-for arch in $ARCHS; do
-    if [ "$arch" = "arm64ec" ]; then
-        rm -f "$INSTALL_PREFIX/lib/windows/libclang_rt.builtins-aarch64.a" \
-              "$INSTALL_PREFIX/lib/windows/libclang_rt.builtins-arm64ec.a"
-        "$PREFIX/bin/llvm-lib" -machine:arm64ec "-out:$INSTALL_PREFIX/lib/windows/libclang_rt.builtins-aarch64.a" \
-                               build-aarch64/lib/windows/libclang_rt.builtins-aarch64.a \
-                               build-arm64ec/lib/windows/libclang_rt.builtins-arm64ec.a
-    fi
 done
 
 if [ "$INSTALL_PREFIX" != "$CLANG_RESOURCE_DIR" ]; then

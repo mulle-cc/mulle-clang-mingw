@@ -48,7 +48,7 @@ if [ ! -d llvm-project/openmp ] || [ -n "$SYNC" ]; then
     CHECKOUT_ONLY=1 ./build-llvm.sh
 fi
 
-cd llvm-project/openmp
+cd llvm-project/runtimes
 
 if command -v ninja >/dev/null; then
     CMAKE_GENERATOR="Ninja"
@@ -64,21 +64,31 @@ else
     esac
 fi
 
+ARM64X_FLAGS=""
+for arch in $ARCHS; do
+    case $arch in
+    arm64ec) ARM64X_FLAGS="-marm64x" ;;
+    esac
+done
+
 for arch in $ARCHS; do
     CMAKEFLAGS=""
+    FLAGS=""
     case $arch in
     x86_64)
         CMAKEFLAGS="$CMAKEFLAGS -DLIBOMP_ASMFLAGS=-m64"
         ;;
+    aarch64)
+        FLAGS="$ARM64X_FLAGS"
+        ;;
     arm64ec)
-        # Not yet supported
         continue
         ;;
     esac
 
-    [ -z "$CLEAN" ] || rm -rf build-$arch
-    mkdir -p build-$arch
-    cd build-$arch
+    [ -z "$CLEAN" ] || rm -rf build-openmp-$arch
+    mkdir -p build-openmp-$arch
+    cd build-openmp-$arch
     [ -n "$NO_RECONF" ] || rm -rf CMake*
 
     cmake \
@@ -92,9 +102,11 @@ for arch in $ARCHS; do
         -DCMAKE_SYSTEM_NAME=Windows \
         -DCMAKE_AR="$PREFIX/bin/llvm-ar" \
         -DCMAKE_RANLIB="$PREFIX/bin/llvm-ranlib" \
+        -DLLVM_ENABLE_RUNTIMES="openmp" \
         -DLIBOMP_ENABLE_SHARED=TRUE \
-        -DCMAKE_C_FLAGS_INIT="$CFGUARD_CFLAGS" \
-        -DCMAKE_CXX_FLAGS_INIT="$CFGUARD_CFLAGS" \
+        -DCMAKE_C_FLAGS_INIT="$CFGUARD_CFLAGS $FLAGS" \
+        -DCMAKE_CXX_FLAGS_INIT="$CFGUARD_CFLAGS $FLAGS" \
+        -DCMAKE_SHARED_LINKER_FLAGS="$FLAGS" \
         $CMAKEFLAGS \
         ..
     cmake --build . ${CORES:+-j${CORES}}

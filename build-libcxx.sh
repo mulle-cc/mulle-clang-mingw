@@ -73,10 +73,34 @@ else
 fi
 
 for arch in $ARCHS; do
+    case $arch in
+    arm64ec) ARM64X_FLAGS="-marm64x" ;;
+    esac
+done
+
+for arch in $ARCHS; do
     [ -z "$CLEAN" ] || rm -rf build-$arch
     mkdir -p build-$arch
     cd build-$arch
     [ -n "$NO_RECONF" ] || rm -rf CMake*
+
+    EXTRA_CFLAGS=""
+    EXTRA_LDFLAGS=""
+    case $arch in
+    i686|x86_64)
+        # Force using the mingw stdio functions, for correct long double
+        # printing.
+        EXTRA_CFLAGS="-D__USE_MINGW_ANSI_STDIO=1"
+        ;;
+    aarch64)
+        EXTRA_CFLAGS="$ARM64X_FLAGS"
+        EXTRA_LDFLAGS="$ARM64X_FLAGS"
+        ;;
+    arm64ec)
+        continue
+        ;;
+    esac
+
     cmake \
         ${CMAKE_GENERATOR+-G} "$CMAKE_GENERATOR" \
         -DCMAKE_BUILD_TYPE=Release \
@@ -107,8 +131,10 @@ for arch in $ARCHS; do
         -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
         -DLIBCXXABI_ENABLE_SHARED=OFF \
         -DLIBCXXABI_LIBDIR_SUFFIX="" \
-        -DCMAKE_C_FLAGS_INIT="$CFGUARD_CFLAGS" \
-        -DCMAKE_CXX_FLAGS_INIT="$CFGUARD_CFLAGS" \
+        -DCMAKE_C_FLAGS_INIT="$CFGUARD_CFLAGS $EXTRA_CFLAGS" \
+        -DCMAKE_CXX_FLAGS_INIT="$CFGUARD_CFLAGS $EXTRA_CFLAGS" \
+        -DCMAKE_ASM_FLAGS_INIT="$EXTRA_CFLAGS" \
+        -DCMAKE_SHARED_LINKER_FLAGS="$EXTRA_LDFLAGS" \
         ..
 
     cmake --build . ${CORES:+-j${CORES}}
