@@ -17,7 +17,7 @@
 set -e
 
 : ${LLVM_REPOSITORY:=https://github.com/mulle-cc/mulle-clang-project.git}
-: ${LLVM_VERSION:=22.1.8.8}
+: ${LLVM_VERSION:=23.1.3.0}
 : ${LLVM_BUILD_TYPE:=Release}
 
 ASSERTS=OFF
